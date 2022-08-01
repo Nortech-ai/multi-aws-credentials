@@ -8,7 +8,8 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "test": "./index.ts add testprofile testid testsecret && ./index.ts list && ./index.ts remove testprofile && ./index.ts list"
+    "test": "./index.ts add testprofile testid testsecret && ./index.ts list && ./index.ts remove testprofile && ./index.ts list",
+    "pub": "tsc index.ts && yarn publish"
   },
   "dependencies": {
     "commander": "^9.4.0"
