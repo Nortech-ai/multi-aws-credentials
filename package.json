@@ -7,6 +7,9 @@
   "author": "joao@nortech.ai",
   "license": "MIT",
   "private": false,
+  "scripts": {
+    "test": "./index.ts add testprofile testid testsecret && ./index.ts list && ./index.ts remove testprofile && ./index.ts list"
+  },
   "dependencies": {
     "commander": "^9.4.0"
   },
