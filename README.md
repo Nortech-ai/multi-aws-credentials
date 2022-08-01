@@ -7,7 +7,7 @@ Simple tool to manage multiple aws credentials locally for when aws cli profiles
 ## Usage:
 
 ```
-Usage: @nortech/multi-aws-credentials [options] [command]
+Usage: multi-aws-credentials [options] [command]
 
 For use cases where aws cli profiles are not sufficient
 
