@@ -1,0 +1,18 @@
+{
+  "name": "@nortech/multi-aws-credentials",
+  "version": "1.0.0",
+  "description": "For use cases where aws cli profiles are not sufficient",
+  "main": "index.js",
+  "repository": "https://github.com/Nortech-ai/multi-aws-credentials",
+  "author": "joao@nortech.ai",
+  "license": "MIT",
+  "private": false,
+  "dependencies": {
+    "commander": "^9.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.6.3",
+    "nodemon": "^2.0.19",
+    "package-json-type": "^1.0.3"
+  }
+}
