@@ -15,6 +15,7 @@ const awsPath = join(homedir(), ".aws")
 const mainFilePath = join(awsPath, "credentials")
 
 program.command("add")
+    .description("Add a profile")
     .argument("<name>", "Profile name")
     .argument("<id>", "Aws access key id")
     .argument("<secret>", "Aws access key secret")
@@ -25,6 +26,7 @@ program.command("add")
     })
 
 program.command("change")
+    .description("Change the current (default) profile")
     .argument("<name>", "Profile name")
     .action((name) => {
         const filePath = getFilePath(name)
@@ -32,19 +34,24 @@ program.command("change")
         writeFileSync(mainFilePath, contents)
         console.log(`Changed active profile in ${mainFilePath} to ${name} in ${filePath}`)
     })
-program.command("list").action(() => {
-    console.log(readdirSync("${homedir()}/.aws").filter((file) => file.endsWith(".creds")))
-})
-program.command("remove", "Remove profile").argument("<name>", "Profile name").action((name) => {
-    const filePath = getFilePath(name)
-    if (existsSync(filePath)) {
-        unlinkSync(filePath)
-        console.log(`Profile ${name} removed from ${filePath}`)
-    }
-    else {
-        console.log(`Profile ${name} not found in ${filePath}`)
-    }
-})
+program.command("list")
+    .description("list profiles")
+    .action(() => {
+        console.log(readdirSync("${homedir()}/.aws").filter((file) => file.endsWith(".creds")))
+    })
+program.command("remove")
+    .description("Remove a profile")
+    .argument("<name>", "Profile name")
+    .action((name) => {
+        const filePath = getFilePath(name)
+        if (existsSync(filePath)) {
+            unlinkSync(filePath)
+            console.log(`Profile ${name} removed from ${filePath}`)
+        }
+        else {
+            console.log(`Profile ${name} not found in ${filePath}`)
+        }
+    })
 
 program.parse()
 
