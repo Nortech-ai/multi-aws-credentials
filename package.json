@@ -1,12 +1,15 @@
 {
   "name": "@nortech/multi-aws-credentials",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "For use cases where aws cli profiles are not sufficient",
   "main": "index.js",
   "repository": "https://github.com/Nortech-ai/multi-aws-credentials",
   "author": "joao@nortech.ai",
   "license": "MIT",
   "private": false,
+  "files": [
+    "index.js"
+  ],
   "scripts": {
     "test": "./index.ts add testprofile testid testsecret && ./index.ts list && ./index.ts remove testprofile && ./index.ts list",
     "pub": "tsc index.ts && yarn publish"
