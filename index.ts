@@ -2,6 +2,7 @@
 
 import { Command } from "commander";
 import {
+  cpSync,
   existsSync,
   readdirSync,
   readFileSync,
@@ -60,6 +61,24 @@ program
         .map((file) => file.replace(".creds", ""))
         .join("\n")
     );
+  });
+program
+  .command("rename")
+  .description("Rename a profile")
+  .argument("<current-name>", "Current profile name")
+  .argument("<new-name>", "New Profile name")
+  .action((currentName, newName) => {
+    const currentFilePath = getFilePath(currentName);
+    if (existsSync(currentFilePath)) {
+      const newFilePath = getFilePath(newName);
+      cpSync(currentFilePath, newFilePath);
+      unlinkSync(currentFilePath);
+      console.log(
+        `Profile ${currentName} moved to ${newName} as ${newFilePath}`
+      );
+    } else {
+      console.log(`Profile ${currentName} not found in ${currentFilePath}`);
+    }
   });
 program
   .command("remove")
