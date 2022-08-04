@@ -21,7 +21,14 @@ Commands:
   help [command]            display help for command
 ```
 
-# How it works
+## How it works
 
 It creates a file in ~/.aws/$NAME.creds for each profile
 Upon changing to a profile, it replace ~/.aws/credentials with the specific profile file
+
+## Why not cli profiles?
+
+1. It makes the commands more verbose.
+2. It makes scripts less reusable (every command needs to include an environment profile).
+3. More prone to mistakes, if you forget to specify a profile somewhere in your script you might break something in the wrong aws environment.
+4. Doesn't play well with non-cli tools. When using automated tools (such as terraform in nortech's case), they should not have to manage aws profiles.
