@@ -1,5 +1,3 @@
-# WIP
-
 ## Multi aws credentials
 
 Simple tool to manage multiple aws credentials locally for when aws cli profiles are not enough
@@ -22,3 +20,8 @@ Commands:
   remove <name>             Remove a profile
   help [command]            display help for command
 ```
+
+# How it works
+
+It creates a file in ~/.aws/$NAME.creds for each profile
+Upon changing to a profile, it replace ~/.aws/credentials with the specific profile file
