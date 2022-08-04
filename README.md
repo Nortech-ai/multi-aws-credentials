@@ -2,6 +2,10 @@
 
 Simple tool to manage multiple aws credentials locally for when aws cli profiles are not enough
 
+## Installation
+- npm: npm install -g @nortech/multi-aws-credentials
+- yarn: yarn global add @nortech/multi-aws-credentials
+
 ## Usage:
 
 ```
