@@ -37,7 +37,7 @@ program
         `[ERROR] Profile ${name} already exists. If you want to replace it, explicitly use the replace command 
         multi-aws-credentials replace <name> <id> <secret>`
       );
-      return;
+      process.exit(1);
     }
     writeProfileFile(filePath, id, secret);
     console.log(`Profile ${name} added to ${filePath}`);
@@ -98,7 +98,10 @@ program
       writeProfileFile(currentFilePath, newId, newSecret);
       console.log(`Profile ${currentName} replaced in ${currentFilePath}`);
     } else {
-      console.error(`Profile ${currentName} not found in ${currentFilePath}`);
+      console.error(
+        `[ERROR] Profile ${currentName} not found in ${currentFilePath}`
+      );
+      process.exit(1);
     }
   });
 
