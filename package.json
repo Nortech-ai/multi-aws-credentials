@@ -12,7 +12,7 @@
     "index.js"
   ],
   "scripts": {
-    "test": "./index.ts add testprofile testid testsecret && ./index.ts list && ./index.ts remove testprofile && ./index.ts list",
+    "test": "./index.ts add testprofile testid testsecret && ./index.ts replace testprofile testid2 testsecret && ./index.ts upsert testprofile testid2 testsecret && ./index.ts remove testprofile",
     "build": "tsc index.ts",
     "install-locally": "yarn build && yarn global add file:$(pwd)",
     "pub": "yarn build && yarn publish"

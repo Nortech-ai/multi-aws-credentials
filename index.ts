@@ -87,6 +87,23 @@ program
   });
 
 program
+  .command("upsert")
+  .description("Add a profile if it doesn't exist, otherwise replace it")
+  .argument("<name>", "Profile name")
+  .argument("<id>", "Aws access key id")
+  .argument("<secret>", "Aws access key secret")
+  .action((name: string, id: string, secret: string) => {
+    const filePath = getFilePath(name);
+    if (existsSync(filePath)) {
+      writeProfileFile(filePath, id, secret);
+      console.log(`Profile ${name} replaced in ${filePath}`);
+    } else {
+      writeProfileFile(filePath, id, secret);
+      console.log(`Profile ${name} added to ${filePath}`);
+    }
+  });
+
+program
   .command("replace")
   .description("Replace a profile")
   .argument("<current-name>", "Current profile name")
