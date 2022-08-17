@@ -1,5 +1,3 @@
-#!/usr/bin/env ts-node --swc
-
 import { Command } from "commander";
 import {
   cpSync,
