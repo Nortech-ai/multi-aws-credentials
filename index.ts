@@ -104,6 +104,28 @@ program
   });
 
 program
+  .command("env")
+  .description(
+    "Outputs a profile as shell compatible variable exports, for use with eval"
+  )
+  .argument("<name>", "Profile name")
+  .action((name: string) => {
+    const filePath = getFilePath(name);
+    const contents = readFileSync(filePath, "utf-8");
+    const lines = contents.split("\n");
+    const id = lines
+      .find((line) => line.startsWith("aws_access_key_id"))!
+      .split("=")[1]
+      .trim();
+    const secret = lines
+      .find((line) => line.startsWith("aws_secret_access_key"))!
+      .split("=")[1]
+      .trim();
+    console.log(`export AWS_ACCESS_KEY_ID=${id}`);
+    console.log(`export AWS_SECRET_ACCESS_KEY=${secret}`);
+  });
+
+program
   .command("replace")
   .description("Replace a profile")
   .argument("<current-name>", "Current profile name")
