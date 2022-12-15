@@ -121,8 +121,9 @@ program
       .find((line) => line.startsWith("aws_secret_access_key"))!
       .split("=")[1]
       .trim();
-    console.log(`export AWS_ACCESS_KEY_ID=${id}`);
-    console.log(`export AWS_SECRET_ACCESS_KEY=${secret}`);
+    console.log(`export AWS_ACCESS_KEY_ID="${id}"`);
+    console.log(`export AWS_SECRET_ACCESS_KEY="${secret}"`);
+    console.log(`export ACTIVE_AWS_PROFILE="${name}"`);
   });
 
 program
