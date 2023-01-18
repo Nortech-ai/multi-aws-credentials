@@ -12,7 +12,7 @@ Supports password encryption, and receiving values from stdin to prevent shell h
 ## Usage:
 
 ```
-Usage: @nortech/multi-aws-credentials [options] [command]
+Usage: multi-aws-credentials [options] [command]
 
 For use cases where aws cli profiles are not sufficient
 

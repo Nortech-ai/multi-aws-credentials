@@ -20,7 +20,7 @@ const program = new Command();
 const packageDetails = getCurrentPackageDetails();
 program
   .version(packageDetails.version!)
-  .name(packageDetails.name!)
+  .name(packageDetails.name!.replace("@nortech/", ""))
   .description(packageDetails.description!);
 
 const awsPath = join(homedir(), ".aws");
