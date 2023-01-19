@@ -18,6 +18,7 @@ const read = require("read") as (opts: {
   prompt: string;
   silent?: boolean;
   replace?: string;
+  output?: NodeJS.WritableStream;
 }) => Promise<string>;
 const program = new Command();
 
@@ -319,6 +320,7 @@ function askForInput(thing: string, silent = false): Promise<string> {
     prompt: `${thing}: `,
     silent,
     replace: silent ? "*" : undefined,
+    output: process.stderr,
   });
 }
 
