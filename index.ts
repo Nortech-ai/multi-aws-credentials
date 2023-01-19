@@ -13,8 +13,12 @@ import {
 import { homedir } from "os";
 import type { IPackageJson } from "package-json-type";
 import { join } from "path";
-import { createInterface } from "readline";
 
+const read = require("read") as (opts: {
+  prompt: string;
+  silent?: boolean;
+  replace?: string;
+}) => Promise<string>;
 const program = new Command();
 
 const packageDetails = getCurrentPackageDetails();
@@ -247,7 +251,9 @@ async function makeContentsWithOrWithoutPassword(
   id: string,
   secret: string
 ) {
-  const password = usePassword ? await askForInput("Password") : undefined;
+  const password = usePassword
+    ? await askForInput("Password", true)
+    : undefined;
 
   const contents = makeProfileContents(id, secret);
   let finalContents = password ? encryptContents(password, contents) : contents;
@@ -274,7 +280,7 @@ function encryptContents(password: string, contents: string) {
 
 async function returnOrDecryptContents(contents: string) {
   const password = contents.startsWith("ENCRYPTED|")
-    ? await askForInput("Password")
+    ? await askForInput("Password", true)
     : undefined;
   return password ? decryptContents(password, contents) : contents;
 }
@@ -308,18 +314,11 @@ function getCurrentPackageDetails() {
     readFileSync(join(__dirname, "package.json"), "utf-8")
   ) as IPackageJson;
 }
-
-async function askForInput(thing: string): Promise<string> {
-  return new Promise<string>((resolve) => {
-    const rl = createInterface({
-      input: process.stdin,
-      output: process.stderr,
-    });
-
-    rl.question(`${thing}: `, (answer) => {
-      rl.close();
-      resolve(answer);
-    });
+function askForInput(thing: string, silent = false): Promise<string> {
+  return read({
+    prompt: `${thing}: `,
+    silent,
+    replace: silent ? "*" : undefined,
   });
 }
 

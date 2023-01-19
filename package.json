@@ -20,7 +20,8 @@
     "start": "ts-node index.ts"
   },
   "dependencies": {
-    "commander": "^9.4.0"
+    "commander": "^9.4.0",
+    "read": "^2.0.0"
   },
   "devDependencies": {
     "@types/node": "^18.11.15",
