@@ -4,6 +4,8 @@ Simple tool to manage multiple aws credentials locally for when aws cli profiles
 
 Supports password encryption, and receiving values from stdin to prevent shell history leakage.
 
+As a preferred mode of operation, it loads your credentials into your shell env instead, meaning there are no unencrypted credential files on disk.
+
 ## Installation
 
 - npm: npm install -g @nortech/multi-aws-credentials
@@ -36,7 +38,8 @@ Commands:
 ## How it works
 
 It creates a file in ~/.aws/$NAME.creds for each profile
-Upon changing to a profile, it replace ~/.aws/credentials with the specific profile file
+Upon changing to a profile, it replaces ~/.aws/credentials with the specific profile file.
+As a preferrable mode of operation, you should instead load the credentials into your current shell with the `env` command like `eval $(multi-aws-credentials env my-profile)`
 
 ## Why not cli profiles?
 
