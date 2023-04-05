@@ -25,11 +25,10 @@ Commands:
   change <name>                                           Change the current (default) profile
   list                                                    list profiles
   rename <current-name> <new-name>                        Rename a profile
-  upsert [options] <name> [id] [secret]                   Add a profile if it doesn't exist,
-                                                          otherwise replace it
-  env <name>                                              Outputs a profile as shell compatible
-                                                          variable exports, for use with eval
+  upsert [options] <name> [id] [secret]                   Add a profile if it doesn't exist, otherwise replace it
+  env <name>                                              Outputs a profile as shell compatible variable exports, for use with eval
   replace [options] <current-name> <new-id> <new-secret>  Replace a profile
+  encrypt <name>                                          Encrypt a profile with a password
   remove <name>                                           Remove a profile
   help [command]                                          display help for command
 ```
