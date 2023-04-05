@@ -232,6 +232,28 @@ program
   );
 
 program
+  .command("encrypt")
+  .description("Encrypt a profile with a password")
+  .argument("<name>", "Profile name")
+  .action(async (name: string) => {
+    const filePath = getFilePath(name);
+    if (!existsSync(filePath)) {
+      console.error(`[ERROR] Profile ${name} not found in ${filePath}`);
+      process.exit(1);
+    }
+    const contents = readFileSync(filePath, "utf-8");
+    if (contentIsEncrypted(contents)) {
+      console.log(`Profile ${name} already encrypted in ${filePath}`);
+      console.log("Reencrypting with new password");
+    }
+    const config = await returnOrDecryptContents(contents);
+    const password = await askForInput("Password", true);
+    writeFileSync(filePath, encryptContents(password, config));
+
+    console.log(`Profile ${name} encrypted in ${filePath}`);
+  });
+
+program
   .command("remove")
   .description("Remove a profile")
   .argument("<name>", "Profile name")
@@ -280,10 +302,14 @@ function encryptContents(password: string, contents: string) {
 }
 
 async function returnOrDecryptContents(contents: string) {
-  const password = contents.startsWith("ENCRYPTED|")
+  const password = contentIsEncrypted(contents)
     ? await askForInput("Password", true)
     : undefined;
   return password ? decryptContents(password, contents) : contents;
+}
+
+function contentIsEncrypted(contents: string) {
+  return contents.startsWith("ENCRYPTED|");
 }
 
 async function decryptContents(password: string, rawContents: string) {
