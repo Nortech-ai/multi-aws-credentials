@@ -29,6 +29,8 @@ Commands:
   rename <current-name> <new-name>                        Rename a profile
   upsert [options] <name> [id] [secret]                   Add a profile if it doesn't exist, otherwise replace it
   env <name>                                              Outputs a profile as shell compatible variable exports, for use with eval
+  env-run <name> [script...]                              Run a command with configured environment variables. Pass command after -- or through
+                                                          stdin
   replace [options] <current-name> <new-id> <new-secret>  Replace a profile
   encrypt <name>                                          Encrypt a profile with a password
   remove <name>                                           Remove a profile
