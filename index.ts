@@ -303,7 +303,7 @@ function encryptContents(password: string, contents: string) {
 
 async function returnOrDecryptContents(contents: string) {
   const password = contentIsEncrypted(contents)
-    ? await askForInput("Password", true)
+    ? await askForInput("Password for aws user", true)
     : undefined;
   return password ? decryptContents(password, contents) : contents;
 }
