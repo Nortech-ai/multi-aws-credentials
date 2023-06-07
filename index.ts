@@ -1,12 +1,14 @@
 #!/usr/bin/env node
 
+import { execSync } from "child_process";
 import { Command } from "commander";
+import { assert } from "console";
 import * as crypto from "crypto";
 import {
   cpSync,
   existsSync,
-  readdirSync,
   readFileSync,
+  readdirSync,
   unlinkSync,
   writeFileSync,
 } from "fs";
@@ -176,22 +178,33 @@ program
   )
   .argument("<name>", "Profile name")
   .action(async (name: string) => {
-    const filePath = getFilePath(name);
-    const contents = await returnOrDecryptContents(
-      readFileSync(filePath, "utf-8")
-    );
-    const lines = contents.split("\n");
-    const id = lines
-      .find((line) => line.startsWith("aws_access_key_id"))!
-      .split("=")[1]
-      .trim();
-    const secret = lines
-      .find((line) => line.startsWith("aws_secret_access_key"))!
-      .split("=")[1]
-      .trim();
+    const { id, secret } = await getProfileSecretAndId(name);
     console.log(`export AWS_ACCESS_KEY_ID="${id}"`);
     console.log(`export AWS_SECRET_ACCESS_KEY="${secret}"`);
     console.log(`export ACTIVE_AWS_PROFILE="${name}"`);
+  });
+
+program
+  .command("env-run")
+  .description(
+    "Run a command with configured environment variables. Pass command after -- or through stdin"
+  )
+  .argument("<name>", "Profile name")
+  .argument("[script...]", "Script to run")
+  .action(async (name: string, args?: string[]) => {
+    const stdinIsTTY = process.stdin.isTTY;
+    assert(stdinIsTTY || args, "Must pass script when not using stdin");
+    const script = stdinIsTTY ? readFileSync(0, "utf-8") : args!.join(" ");
+    await getProfileSecretAndId(name);
+    const env = {
+      AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
+      AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
+      ACTIVE_AWS_PROFILE: name,
+    };
+    execSync(script, {
+      stdio: "inherit",
+      env,
+    });
   });
 
 program
@@ -268,6 +281,23 @@ program
   });
 
 program.parse();
+
+async function getProfileSecretAndId(name: string) {
+  const filePath = getFilePath(name);
+  const contents = await returnOrDecryptContents(
+    readFileSync(filePath, "utf-8")
+  );
+  const lines = contents.split("\n");
+  const id = lines
+    .find((line) => line.startsWith("aws_access_key_id"))!
+    .split("=")[1]
+    .trim();
+  const secret = lines
+    .find((line) => line.startsWith("aws_secret_access_key"))!
+    .split("=")[1]
+    .trim();
+  return { id, secret };
+}
 
 async function makeContentsWithOrWithoutPassword(
   usePassword: boolean,
