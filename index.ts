@@ -221,43 +221,6 @@ program
   });
 
 program
-  .command("replace")
-  .description("Replace a profile")
-  .argument("<current-name>", "Current profile name")
-  .argument("<new-id>", "New access key id")
-  .argument("<new-secret>", "New access key secret")
-  .option(
-    "--password",
-    "Reads a password from stdin to encrypt the credentials"
-  )
-  .action(
-    async (
-      currentName: string,
-      newId: string,
-      newSecret: string,
-      options: { password: boolean }
-    ) => {
-      const currentFilePath = getFilePath(currentName);
-      if (existsSync(currentFilePath)) {
-        writeFileSync(
-          currentFilePath,
-          await makeContentsWithOrWithoutPassword(
-            options.password,
-            newId,
-            newSecret
-          )
-        );
-        console.log(`Profile ${currentName} replaced in ${currentFilePath}`);
-      } else {
-        console.error(
-          `[ERROR] Profile ${currentName} not found in ${currentFilePath}`
-        );
-        process.exit(1);
-      }
-    }
-  );
-
-program
   .command("encrypt")
   .description("Encrypt a profile with a password")
   .argument("<name>", "Profile name")
