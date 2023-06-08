@@ -45,6 +45,10 @@ program
     "[secret]",
     "Aws access key secret, optional (will read from stdin if not provided)"
   )
+  .argument(
+    "[region]",
+    "Aws region, optional (will read from stdin if not provided)"
+  )
   .option(
     "--password",
     "Reads a password from stdin to encrypt the credentials, will be requested when using the profile"
@@ -54,6 +58,7 @@ program
       name: string,
       id?: string,
       secret?: string,
+      region?: string,
       options: { password: boolean } = { password: false }
     ) => {
       if (!id) {
@@ -61,6 +66,9 @@ program
       }
       if (!secret) {
         secret = await askForInput("Aws access key secret");
+      }
+      if (!region) {
+        region = await askForInput("Aws region [Optional]");
       }
       const filePath = getFilePath(name);
       if (existsSync(filePath)) {
@@ -74,7 +82,8 @@ program
       const contents = await makeContentsWithOrWithoutPassword(
         options.password,
         id,
-        secret
+        secret,
+        region
       );
 
       writeFileSync(filePath, contents);
@@ -139,6 +148,10 @@ program
     "[secret]",
     "Aws access key secret, optional (will read from stdin if not provided)"
   )
+  .argument(
+    "[region]",
+    "Aws region, optional (will read from stdin if not provided)"
+  )
   .option(
     "--password",
     "Reads a password from stdin to encrypt the credentials, will be requested when using the profile"
@@ -148,6 +161,7 @@ program
       name: string,
       id?: string,
       secret?: string,
+      region?: string,
       options: { password: boolean } = { password: false }
     ) => {
       if (!id) {
@@ -156,11 +170,15 @@ program
       if (!secret) {
         secret = await askForInput("Aws access key secret");
       }
+      if (!region) {
+        region = await askForInput("Aws region [Optional]");
+      }
       const filePath = getFilePath(name);
       const contents = await makeContentsWithOrWithoutPassword(
         options.password,
         id,
-        secret
+        secret,
+        region
       );
       if (existsSync(filePath)) {
         console.log(`Profile ${name} replaced in ${filePath}`);
@@ -178,10 +196,10 @@ program
   )
   .argument("<name>", "Profile name")
   .action(async (name: string) => {
-    const { id, secret } = await getProfileSecretAndId(name);
-    console.log(`export AWS_ACCESS_KEY_ID="${id}"`);
-    console.log(`export AWS_SECRET_ACCESS_KEY="${secret}"`);
-    console.log(`export ACTIVE_AWS_PROFILE="${name}"`);
+    const env = await getProfileEnv(name);
+    Object.entries(env).forEach(([key, value]) => {
+      console.log(`export ${key}="${value}"`);
+    });
   });
 
 program
@@ -195,12 +213,7 @@ program
     const stdinIsTTY = process.stdin.isTTY;
     assert(stdinIsTTY || args, "Must pass script when not using stdin");
     const script = stdinIsTTY ? readFileSync(0, "utf-8") : args!.join(" ");
-    await getProfileSecretAndId(name);
-    const env = {
-      AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
-      AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
-      ACTIVE_AWS_PROFILE: name,
-    };
+    const env = await getProfileEnv(name);
     execSync(script, {
       stdio: "inherit",
       env,
@@ -282,7 +295,20 @@ program
 
 program.parse();
 
-async function getProfileSecretAndId(name: string) {
+async function getProfileEnv(name: string) {
+  const contents = await getProfileContents(name);
+  const env = {
+    AWS_ACCESS_KEY_ID: contents.id,
+    AWS_SECRET_ACCESS_KEY: contents.secret,
+    AWS_DEFAULT_REGION: contents.region,
+    ACTIVE_AWS_PROFILE: name,
+  };
+  return Object.fromEntries(
+    Object.entries(env).filter(([, value]) => value !== undefined)
+  );
+}
+
+async function getProfileContents(name: string) {
   const filePath = getFilePath(name);
   const contents = await returnOrDecryptContents(
     readFileSync(filePath, "utf-8")
@@ -296,19 +322,21 @@ async function getProfileSecretAndId(name: string) {
     .find((line) => line.startsWith("aws_secret_access_key"))!
     .split("=")[1]
     .trim();
-  return { id, secret };
+  const region = extractRegionFromConfig(contents);
+  return { id, secret, region };
 }
 
 async function makeContentsWithOrWithoutPassword(
   usePassword: boolean,
   id: string,
-  secret: string
+  secret: string,
+  region?: string
 ) {
   const password = usePassword
     ? await askForInput("Password", true)
     : undefined;
 
-  const contents = makeProfileContents(id, secret);
+  const contents = makeProfileContents(id, secret, region);
   let finalContents = password ? encryptContents(password, contents) : contents;
   return finalContents;
 }
@@ -358,8 +386,22 @@ async function decryptContents(password: string, rawContents: string) {
   return decrypted;
 }
 
-function makeProfileContents(id: string, secret: string): string {
-  return `[default]\naws_access_key_id = ${id}\naws_secret_access_key = ${secret}`;
+function makeProfileContents(
+  id: string,
+  secret: string,
+  region?: string
+): string {
+  return `[default]\naws_access_key_id = ${id}\naws_secret_access_key = ${secret}\n${
+    region ? `region = ${region}\n` : ""
+  }`;
+}
+
+function extractRegionFromConfig(config: string) {
+  const lines = config.split("\n");
+  const regionLine = lines.find((line) => line.startsWith("region"));
+  if (regionLine) {
+    return regionLine.split("=")[1].trim();
+  }
 }
 
 function getFilePath(name: string) {
