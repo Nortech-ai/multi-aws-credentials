@@ -19,22 +19,20 @@ Usage: multi-aws-credentials [options] [command]
 For use cases where aws cli profiles are not sufficient
 
 Options:
-  -V, --version                                           output the version number
-  -h, --help                                              display help for command
+  -V, --version                                   output the version number
+  -h, --help                                      display help for command
 
 Commands:
-  add [options] <name> [id] [secret]                      Add a profile
-  change <name>                                           Change the current (default) profile
-  list                                                    list profiles
-  rename <current-name> <new-name>                        Rename a profile
-  upsert [options] <name> [id] [secret]                   Add a profile if it doesn't exist, otherwise replace it
-  env <name>                                              Outputs a profile as shell compatible variable exports, for use with eval
-  env-run <name> [script...]                              Run a command with configured environment variables. Pass command after -- or through
-                                                          stdin
-  replace [options] <current-name> <new-id> <new-secret>  Replace a profile
-  encrypt <name>                                          Encrypt a profile with a password
-  remove <name>                                           Remove a profile
-  help [command]                                          display help for command
+  add [options] <name> [id] [secret] [region]     Add a profile
+  change <name>                                   Change the current (default) profile
+  list                                            list profiles
+  rename <current-name> <new-name>                Rename a profile
+  upsert [options] <name> [id] [secret] [region]  Add a profile if it doesn't exist, otherwise replace it
+  env <name>                                      Outputs a profile as shell compatible variable exports, for use with eval
+  env-run <name> [script...]                      Run a command with configured environment variables. Pass command after -- or through stdin
+  encrypt <name>                                  Encrypt a profile with a password
+  remove <name>                                   Remove a profile
+  help [command]                                  display help for command
 ```
 
 ## How it works
