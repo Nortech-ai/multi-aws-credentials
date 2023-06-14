@@ -216,7 +216,10 @@ program
     const env = await getProfileEnv(name);
     execSync(script, {
       stdio: "inherit",
-      env,
+      env: {
+        ...process.env,
+        ...env,
+      },
     });
   });
 
