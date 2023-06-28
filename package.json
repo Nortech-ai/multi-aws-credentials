@@ -1,15 +1,33 @@
-import { execSync } from 'child_process';
-import * as fs from 'fs';
-describe('End-to-End Test', () => {
-  const profileName = 'testProfile';
-  it('should create and delete a profile', () => {
-    // Create a profile
-    execSync(`./index.ts add ${profileName} testId testSecret`);
-    // Check if the profile was created successfully
-    expect(fs.existsSync(`~/.aws/${profileName}.creds`)).toBeTruthy();
-    // Delete the profile
-    execSync(`./index.ts remove ${profileName}`);
-    // Check if the profile was deleted successfully
-    expect(fs.existsSync(`~/.aws/${profileName}.creds`)).toBeFalsy();
-  });
-});
+{
+  "name": "@nortech/multi-aws-credentials",
+  "version": "2.7.0",
+  "description": "For use cases where aws cli profiles are not sufficient",
+  "main": "index.js",
+  "repository": "https://github.com/Nortech-ai/multi-aws-credentials",
+  "author": "joao@nortech.ai",
+  "license": "MIT",
+  "private": false,
+  "bin": "index.js",
+  "files": [
+    "index.js"
+  ],
+  "scripts": {
+    "test": "./index.ts add testprofile testid testsecret && ./index.ts replace testprofile testid2 testsecret && ./index.ts upsert testprofile testid2 testsecret && ./index.ts remove testprofile",
+    "prepack": "tsc index.ts",
+    "install-locally": "yarn prepack && yarn global add file:$(pwd)",
+    "pub": "yarn prepack && yarn publish",
+    "dev": "nodemon index.ts",
+    "start": "ts-node index.ts"
+  },
+  "dependencies": {
+    "commander": "^9.4.0",
+    "read": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.15",
+    "nodemon": "^2.0.20",
+    "package-json-type": "^1.0.3",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.4"
+  }
+}
