@@ -13,5 +13,3 @@ describe('End-to-End Test', () => {
     expect(fs.existsSync(`~/.aws/${profileName}.creds`)).toBeFalsy();
   });
 });
-
-
