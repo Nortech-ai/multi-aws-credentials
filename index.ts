@@ -27,11 +27,14 @@ const packageDetails = getCurrentPackageDetails();
 program
   .version(packageDetails.version!)
   .name(packageDetails.name!.replace("@nortech/", ""))
-  .description(packageDetails.description!);
-const awsPath = join(homedir(), ".aws");
-if (!existsSync(awsPath)) {
-  mkdirSync(awsPath);
+function ensureAwsFolderExists() {
+  const awsPath = join(homedir(), ".aws");
+  if (!existsSync(awsPath)) {
+    mkdirSync(awsPath);
+  }
+  return awsPath;
 }
+const awsPath = ensureAwsFolderExists();
 const mainFilePath = join(awsPath, "credentials");
 program
   .command("add")
@@ -104,11 +107,8 @@ program
   });
 program
   .command("list")
-  .description("list profiles")
   .action(() => {
-    if (!existsSync(awsPath)) {
-      mkdirSync(awsPath);
-    }
+    ensureAwsFolderExists();
     console.log(
       readdirSync(awsPath)
         .filter((file) => file.endsWith(".creds"))
