@@ -17,6 +17,7 @@
     "install-locally": "yarn prepack && yarn global add file:$(pwd)",
     "pub": "yarn prepack && yarn publish",
     "dev": "nodemon index.ts",
+    "test:e2e": "jest src/tests/e2e.test.ts",
     "start": "ts-node index.ts"
   },
   "dependencies": {
