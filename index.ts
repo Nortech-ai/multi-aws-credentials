@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-
 import { execSync } from "child_process";
 import { Command } from "commander";
 import { assert } from "console";
@@ -11,11 +10,12 @@ import {
   readdirSync,
   unlinkSync,
   writeFileSync,
+  mkdirSync,
+  dirname,
 } from "fs";
 import { homedir } from "os";
 import type { IPackageJson } from "package-json-type";
 import { join } from "path";
-
 const read = require("read") as (opts: {
   prompt: string;
   silent?: boolean;
@@ -23,16 +23,16 @@ const read = require("read") as (opts: {
   output?: NodeJS.WritableStream;
 }) => Promise<string>;
 const program = new Command();
-
 const packageDetails = getCurrentPackageDetails();
 program
   .version(packageDetails.version!)
   .name(packageDetails.name!.replace("@nortech/", ""))
   .description(packageDetails.description!);
-
 const awsPath = join(homedir(), ".aws");
+if (!existsSync(awsPath)) {
+  mkdirSync(awsPath);
+}
 const mainFilePath = join(awsPath, "credentials");
-
 program
   .command("add")
   .description("Add a profile")
@@ -78,19 +78,16 @@ program
         );
         process.exit(1);
       }
-
       const contents = await makeContentsWithOrWithoutPassword(
         options.password,
         id,
         secret,
         region
       );
-
       writeFileSync(filePath, contents);
       console.log(`Profile ${name} added to ${filePath}`);
     }
   );
-
 program
   .command("change")
   .description("Change the current (default) profile")
@@ -109,6 +106,9 @@ program
   .command("list")
   .description("list profiles")
   .action(() => {
+    if (!existsSync(awsPath)) {
+      mkdirSync(awsPath);
+    }
     console.log(
       readdirSync(awsPath)
         .filter((file) => file.endsWith(".creds"))
@@ -116,7 +116,6 @@ program
         .join("\n")
     );
   });
-
 program
   .command("rename")
   .description("Rename a profile")
@@ -135,7 +134,6 @@ program
       console.log(`Profile ${currentName} not found in ${currentFilePath}`);
     }
   });
-
 program
   .command("upsert")
   .description("Add a profile if it doesn't exist, otherwise replace it")
@@ -188,7 +186,6 @@ program
       writeFileSync(filePath, contents);
     }
   );
-
 program
   .command("env")
   .description(
@@ -201,7 +198,6 @@ program
       console.log(`export ${key}="${value}"`);
     });
   });
-
 program
   .command("env-run")
   .description(
@@ -222,7 +218,6 @@ program
       },
     });
   });
-
 program
   .command("encrypt")
   .description("Encrypt a profile with a password")
@@ -241,10 +236,8 @@ program
     const config = await returnOrDecryptContents(contents);
     const password = await askForInput("Password", true);
     writeFileSync(filePath, encryptContents(password, config));
-
     console.log(`Profile ${name} encrypted in ${filePath}`);
   });
-
 program
   .command("remove")
   .description("Remove a profile")
@@ -258,9 +251,7 @@ program
       console.log(`Profile ${name} not found in ${filePath}`);
     }
   });
-
 program.parse();
-
 async function getProfileEnv(name: string) {
   const contents = await getProfileContents(name);
   const env = {
@@ -273,7 +264,6 @@ async function getProfileEnv(name: string) {
     Object.entries(env).filter(([, value]) => value !== undefined)
   );
 }
-
 async function getProfileContents(name: string) {
   const filePath = getFilePath(name);
   const contents = await returnOrDecryptContents(
@@ -291,7 +281,6 @@ async function getProfileContents(name: string) {
   const region = extractRegionFromConfig(contents);
   return { id, secret, region };
 }
-
 async function makeContentsWithOrWithoutPassword(
   usePassword: boolean,
   id: string,
@@ -301,12 +290,10 @@ async function makeContentsWithOrWithoutPassword(
   const password = usePassword
     ? await askForInput("Password", true)
     : undefined;
-
   const contents = makeProfileContents(id, secret, region);
   let finalContents = password ? encryptContents(password, contents) : contents;
   return finalContents;
 }
-
 function encryptContents(password: string, contents: string) {
   const iv = crypto.randomBytes(16);
   const cipher = crypto.createCipheriv(
@@ -324,18 +311,15 @@ function encryptContents(password: string, contents: string) {
   };
   return "ENCRYPTED|" + JSON.stringify(c);
 }
-
 async function returnOrDecryptContents(contents: string) {
   const password = contentIsEncrypted(contents)
     ? await askForInput("Password for aws user", true)
     : undefined;
   return password ? decryptContents(password, contents) : contents;
 }
-
 function contentIsEncrypted(contents: string) {
   return contents.startsWith("ENCRYPTED|");
 }
-
 async function decryptContents(password: string, rawContents: string) {
   const c = JSON.parse(rawContents.split("|")[1]);
   const contents = Buffer.from(c.contents, "base64");
@@ -351,7 +335,6 @@ async function decryptContents(password: string, rawContents: string) {
   ]).toString("utf-8");
   return decrypted;
 }
-
 function makeProfileContents(
   id: string,
   secret: string,
@@ -361,7 +344,6 @@ function makeProfileContents(
     region ? `region = ${region}\n` : ""
   }`;
 }
-
 function extractRegionFromConfig(config: string) {
   const lines = config.split("\n");
   const regionLine = lines.find((line) => line.startsWith("region"));
@@ -369,11 +351,14 @@ function extractRegionFromConfig(config: string) {
     return regionLine.split("=")[1].trim();
   }
 }
-
 function getFilePath(name: string) {
-  return join(awsPath, `${name}.creds`);
+  const filePath = join(awsPath, `${name}.creds`);
+  const dirPath = dirname(filePath);
+  if (!existsSync(dirPath)) {
+    mkdirSync(dirPath);
+  }
+  return filePath;
 }
-
 function getCurrentPackageDetails() {
   return JSON.parse(
     readFileSync(join(__dirname, "package.json"), "utf-8")
@@ -387,7 +372,6 @@ function askForInput(thing: string, silent = false): Promise<string> {
     output: process.stderr,
   });
 }
-
 function hashPassword(password: string) {
   return crypto.createHash("sha256").update(password).digest();
 }
