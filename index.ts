@@ -11,6 +11,7 @@ import {
   readdirSync,
   unlinkSync,
   writeFileSync,
+  mkdirSync
 } from "fs";
 import { homedir } from "os";
 import type { IPackageJson } from "package-json-type";
@@ -25,16 +26,19 @@ const read = require("read") as (opts: {
 const program = new Command();
 
 const packageDetails = getCurrentPackageDetails();
+function ensureAwsFolderExists() {
+  const awsPath = join(homedir(), ".aws");
+  if (!existsSync(awsPath)) {
+    mkdirSync(awsPath);
+  }
+  return awsPath;
+}
+const awsPath = ensureAwsFolderExists();
+const mainFilePath = join(awsPath, "credentials");
 program
   .version(packageDetails.version!)
   .name(packageDetails.name!.replace("@nortech/", ""))
   .description(packageDetails.description!);
-
-const awsPath = join(homedir(), ".aws");
-if (!existsSync(awsPath)) {
-  mkdirSync(awsPath);
-}
-const mainFilePath = join(awsPath, "credentials");
 
 program
   .command("add")
