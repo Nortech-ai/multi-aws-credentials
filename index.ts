@@ -15,8 +15,6 @@ import {
 import { homedir } from "os";
 import type { IPackageJson } from "package-json-type";
 import { join } from "path";
-import type { IPackageJson } from "package-json-type";
-import { join } from "path";
 
 const read = require("read") as (opts: {
   prompt: string;
