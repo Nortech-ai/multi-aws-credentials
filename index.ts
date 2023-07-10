@@ -68,6 +68,7 @@ program
       region?: string,
       options: { password: boolean } = { password: false }
     ) => {
+      ensureAwsFolderExists();
       if (!id) {
         id = await askForInput("Aws access key id");
       }
@@ -103,6 +104,7 @@ program
   .description("Change the current (default) profile")
   .argument("<name>", "Profile name")
   .action(async (name: string) => {
+    ensureAwsFolderExists();
     const filePath = getFilePath(name);
     const contents = await returnOrDecryptContents(
       readFileSync(filePath, "utf-8")
@@ -116,6 +118,7 @@ program
   .command("list")
   .description("list profiles")
   .action(() => {
+    ensureAwsFolderExists();
     console.log(
       readdirSync(awsPath)
         .filter((file) => file.endsWith(".creds"))
@@ -130,6 +133,7 @@ program
   .argument("<current-name>", "Current profile name")
   .argument("<new-name>", "New Profile name")
   .action((currentName: string, newName: string) => {
+    ensureAwsFolderExists();
     const currentFilePath = getFilePath(currentName);
     if (existsSync(currentFilePath)) {
       const newFilePath = getFilePath(newName);
@@ -171,6 +175,7 @@ program
       region?: string,
       options: { password: boolean } = { password: false }
     ) => {
+      ensureAwsFolderExists();
       if (!id) {
         id = await askForInput("Aws access key id");
       }
@@ -203,6 +208,7 @@ program
   )
   .argument("<name>", "Profile name")
   .action(async (name: string) => {
+    ensureAwsFolderExists();
     const env = await getProfileEnv(name);
     Object.entries(env).forEach(([key, value]) => {
       console.log(`export ${key}="${value}"`);
@@ -217,6 +223,7 @@ program
   .argument("<name>", "Profile name")
   .argument("[script...]", "Script to run")
   .action(async (name: string, args?: string[]) => {
+    ensureAwsFolderExists();
     const stdinIsTTY = process.stdin.isTTY;
     assert(stdinIsTTY || args, "Must pass script when not using stdin");
     const script = stdinIsTTY ? readFileSync(0, "utf-8") : args!.join(" ");
@@ -235,6 +242,7 @@ program
   .description("Encrypt a profile with a password")
   .argument("<name>", "Profile name")
   .action(async (name: string) => {
+    ensureAwsFolderExists();
     const filePath = getFilePath(name);
     if (!existsSync(filePath)) {
       console.error(`[ERROR] Profile ${name} not found in ${filePath}`);
@@ -257,6 +265,7 @@ program
   .description("Remove a profile")
   .argument("<name>", "Profile name")
   .action((name: string) => {
+    ensureAwsFolderExists();
     const filePath = getFilePath(name);
     if (existsSync(filePath)) {
       unlinkSync(filePath);
