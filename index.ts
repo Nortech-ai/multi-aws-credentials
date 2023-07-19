@@ -24,14 +24,20 @@ const read = require("read") as (opts: {
 }) => Promise<string>;
 const program = new Command();
 
+const packageDetails = getCurrentPackageDetails();
+program
+  .version(packageDetails.version!)
+  .name(packageDetails.name!.replace("@nortech/", ""))
+  .description(packageDetails.description!);
+
 const awsPath = join(homedir(), ".aws");
 const mainFilePath = join(awsPath, "credentials");
 
-function ensureAwsFolderExists() {
+const ensureAwsFolderExists = () => {
   if (!existsSync(awsPath)) {
     fs.mkdirSync(awsPath);
   }
-}
+};
 
 program
   .command("add")
@@ -53,8 +59,6 @@ program
     "--password",
     "Reads a password from stdin to encrypt the credentials, will be requested when using the profile"
   )
-  ensureAwsFolderExists();
-  ensureAwsFolderExists();
   .action(
     async (
       name: string,
@@ -63,6 +67,7 @@ program
       region?: string,
       options: { password: boolean } = { password: false }
     ) => {
+      ensureAwsFolderExists();
       if (!id) {
         id = await askForInput("Aws access key id");
       }
@@ -97,11 +102,8 @@ program
   .command("change")
   .description("Change the current (default) profile")
   .argument("<name>", "Profile name")
-  ensureAwsFolderExists();
-  ensureAwsFolderExists();
-  ensureAwsFolderExists();
-  ensureAwsFolderExists();
   .action(async (name: string) => {
+    ensureAwsFolderExists();
     const filePath = getFilePath(name);
     const contents = await returnOrDecryptContents(
       readFileSync(filePath, "utf-8")
@@ -114,8 +116,8 @@ program
 program
   .command("list")
   .description("list profiles")
-  ensureAwsFolderExists();
   .action(() => {
+    ensureAwsFolderExists();
     console.log(
       readdirSync(awsPath)
         .filter((file) => file.endsWith(".creds"))
@@ -129,8 +131,8 @@ program
   .description("Rename a profile")
   .argument("<current-name>", "Current profile name")
   .argument("<new-name>", "New Profile name")
-  ensureAwsFolderExists();
   .action((currentName: string, newName: string) => {
+    ensureAwsFolderExists();
     const currentFilePath = getFilePath(currentName);
     if (existsSync(currentFilePath)) {
       const newFilePath = getFilePath(newName);
@@ -172,6 +174,7 @@ program
       region?: string,
       options: { password: boolean } = { password: false }
     ) => {
+      ensureAwsFolderExists();
       if (!id) {
         id = await askForInput("Aws access key id");
       }
@@ -236,6 +239,7 @@ program
   .description("Encrypt a profile with a password")
   .argument("<name>", "Profile name")
   .action(async (name: string) => {
+    ensureAwsFolderExists();
     const filePath = getFilePath(name);
     if (!existsSync(filePath)) {
       console.error(`[ERROR] Profile ${name} not found in ${filePath}`);
@@ -257,8 +261,8 @@ program
   .command("remove")
   .description("Remove a profile")
   .argument("<name>", "Profile name")
-  ensureAwsFolderExists();
   .action((name: string) => {
+    ensureAwsFolderExists();
     const filePath = getFilePath(name);
     if (existsSync(filePath)) {
       unlinkSync(filePath);
