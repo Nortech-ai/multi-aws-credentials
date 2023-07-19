@@ -2,6 +2,7 @@ import { execSync } from 'child_process';
 import * as path from 'path';
 import { existsSync, unlinkSync } from 'fs';
 import { test, expect } from '@jest/globals';
+import { homedir } from 'os';
 
 test('create and delete a profile', () => {
   const profileName = 'testProfile';
