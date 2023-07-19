@@ -24,14 +24,14 @@ const read = require("read") as (opts: {
 }) => Promise<string>;
 const program = new Command();
 
-const packageDetails = getCurrentPackageDetails();
-program
-  .version(packageDetails.version!)
-  .name(packageDetails.name!.replace("@nortech/", ""))
-  .description(packageDetails.description!);
-
 const awsPath = join(homedir(), ".aws");
 const mainFilePath = join(awsPath, "credentials");
+
+function ensureAwsFolderExists() {
+  if (!existsSync(awsPath)) {
+    fs.mkdirSync(awsPath);
+  }
+}
 
 program
   .command("add")
@@ -53,6 +53,8 @@ program
     "--password",
     "Reads a password from stdin to encrypt the credentials, will be requested when using the profile"
   )
+  ensureAwsFolderExists();
+  ensureAwsFolderExists();
   .action(
     async (
       name: string,
@@ -95,6 +97,10 @@ program
   .command("change")
   .description("Change the current (default) profile")
   .argument("<name>", "Profile name")
+  ensureAwsFolderExists();
+  ensureAwsFolderExists();
+  ensureAwsFolderExists();
+  ensureAwsFolderExists();
   .action(async (name: string) => {
     const filePath = getFilePath(name);
     const contents = await returnOrDecryptContents(
@@ -108,6 +114,7 @@ program
 program
   .command("list")
   .description("list profiles")
+  ensureAwsFolderExists();
   .action(() => {
     console.log(
       readdirSync(awsPath)
@@ -122,6 +129,7 @@ program
   .description("Rename a profile")
   .argument("<current-name>", "Current profile name")
   .argument("<new-name>", "New Profile name")
+  ensureAwsFolderExists();
   .action((currentName: string, newName: string) => {
     const currentFilePath = getFilePath(currentName);
     if (existsSync(currentFilePath)) {
@@ -249,6 +257,7 @@ program
   .command("remove")
   .description("Remove a profile")
   .argument("<name>", "Profile name")
+  ensureAwsFolderExists();
   .action((name: string) => {
     const filePath = getFilePath(name);
     if (existsSync(filePath)) {
