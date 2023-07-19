@@ -1,5 +1,5 @@
 import { execSync } from 'child_process';
-import { join } from 'path';
+import { join, homedir } from 'path';
 import { existsSync, unlinkSync } from 'fs';
 import { test } from '@jest/globals';
 
