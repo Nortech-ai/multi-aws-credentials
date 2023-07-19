@@ -1,13 +1,12 @@
 import { execSync } from 'child_process';
-import * as path from 'path';
+import { homedir } from 'os';
 import { existsSync, unlinkSync } from 'fs';
 import { test, expect } from '@jest/globals';
-import { homedir } from 'os';
 
 test('create and delete a profile', () => {
   const profileName = 'testProfile';
-  const awsPath = path.join(homedir(), '.aws');
-  const filePath = path.join(awsPath, profileName);
+  const awsPath = homedir() + '/.aws';
+  const filePath = awsPath + '/' + profileName;
 
   // Create a profile
   execSync(`./index.ts add ${profileName} testId testSecret testRegion`);
