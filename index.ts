@@ -33,6 +33,12 @@ program
 const awsPath = join(homedir(), ".aws");
 const mainFilePath = join(awsPath, "credentials");
 
+const ensureAwsFolderExists = () => {
+  if (!existsSync(awsPath)) {
+    fs.mkdirSync(awsPath);
+  }
+};
+
 program
   .command("add")
   .description("Add a profile")
@@ -61,6 +67,7 @@ program
       region?: string,
       options: { password: boolean } = { password: false }
     ) => {
+      ensureAwsFolderExists();
       if (!id) {
         id = await askForInput("Aws access key id");
       }
@@ -96,6 +103,7 @@ program
   .description("Change the current (default) profile")
   .argument("<name>", "Profile name")
   .action(async (name: string) => {
+    ensureAwsFolderExists();
     const filePath = getFilePath(name);
     const contents = await returnOrDecryptContents(
       readFileSync(filePath, "utf-8")
@@ -109,6 +117,7 @@ program
   .command("list")
   .description("list profiles")
   .action(() => {
+    ensureAwsFolderExists();
     console.log(
       readdirSync(awsPath)
         .filter((file) => file.endsWith(".creds"))
@@ -123,6 +132,7 @@ program
   .argument("<current-name>", "Current profile name")
   .argument("<new-name>", "New Profile name")
   .action((currentName: string, newName: string) => {
+    ensureAwsFolderExists();
     const currentFilePath = getFilePath(currentName);
     if (existsSync(currentFilePath)) {
       const newFilePath = getFilePath(newName);
@@ -164,6 +174,7 @@ program
       region?: string,
       options: { password: boolean } = { password: false }
     ) => {
+      ensureAwsFolderExists();
       if (!id) {
         id = await askForInput("Aws access key id");
       }
@@ -228,6 +239,7 @@ program
   .description("Encrypt a profile with a password")
   .argument("<name>", "Profile name")
   .action(async (name: string) => {
+    ensureAwsFolderExists();
     const filePath = getFilePath(name);
     if (!existsSync(filePath)) {
       console.error(`[ERROR] Profile ${name} not found in ${filePath}`);
@@ -250,6 +262,7 @@ program
   .description("Remove a profile")
   .argument("<name>", "Profile name")
   .action((name: string) => {
+    ensureAwsFolderExists();
     const filePath = getFilePath(name);
     if (existsSync(filePath)) {
       unlinkSync(filePath);
