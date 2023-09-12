@@ -12,7 +12,8 @@
     "index.js"
   ],
   "scripts": {
-    "test": "./index.ts add testprofile testid testsecret && ./index.ts replace testprofile testid2 testsecret && ./index.ts upsert testprofile testid2 testsecret && ./index.ts remove testprofile",
+    "test": "jest",
+    "tsc": "tsc",
     "prepack": "tsc index.ts",
     "install-locally": "yarn prepack && yarn global add file:$(pwd)",
     "pub": "yarn prepack && yarn publish",
