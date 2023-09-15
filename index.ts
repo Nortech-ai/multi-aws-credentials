@@ -30,7 +30,8 @@ program
   .name(packageDetails.name!.replace("@nortech/", ""))
   .description(packageDetails.description!);
 
-const awsPath = join(homedir(), ".aws");
+const awsPath =
+  process.env.AWS_PATH || program.awsPath || join(homedir(), ".aws");
 const mainFilePath = join(awsPath, "credentials");
 
 program
@@ -39,19 +40,19 @@ program
   .argument("<name>", "Profile name")
   .argument(
     "[id]",
-    "Aws access key id, optional (will read from stdin if not provided)"
+    "Aws access key id, optional (will read from stdin if not provided)",
   )
   .argument(
     "[secret]",
-    "Aws access key secret, optional (will read from stdin if not provided)"
+    "Aws access key secret, optional (will read from stdin if not provided)",
   )
   .argument(
     "[region]",
-    "Aws region, optional (will read from stdin if not provided)"
+    "Aws region, optional (will read from stdin if not provided)",
   )
   .option(
     "--password",
-    "Reads a password from stdin to encrypt the credentials, will be requested when using the profile"
+    "Reads a password from stdin to encrypt the credentials, will be requested when using the profile",
   )
   .action(
     async (
@@ -59,8 +60,9 @@ program
       id?: string,
       secret?: string,
       region?: string,
-      options: { password: boolean } = { password: false }
+      options: { password: boolean } = { password: false },
     ) => {
+      ensureAwsFolderExists();
       if (!id) {
         id = await askForInput("Aws access key id");
       }
@@ -74,7 +76,7 @@ program
       if (existsSync(filePath)) {
         console.error(
           `[ERROR] Profile ${name} already exists. If you want to replace it, explicitly use the replace command
-  multi-aws-credentials replace <name> <id> <secret>`
+  multi-aws-credentials replace <name> <id> <secret>`,
         );
         process.exit(1);
       }
@@ -83,12 +85,12 @@ program
         options.password,
         id,
         secret,
-        region
+        region,
       );
 
       writeFileSync(filePath, contents);
       console.log(`Profile ${name} added to ${filePath}`);
-    }
+    },
   );
 
 program
@@ -98,11 +100,11 @@ program
   .action(async (name: string) => {
     const filePath = getFilePath(name);
     const contents = await returnOrDecryptContents(
-      readFileSync(filePath, "utf-8")
+      readFileSync(filePath, "utf-8"),
     );
     writeFileSync(mainFilePath, contents);
     console.log(
-      `Changed active profile in ${mainFilePath} to ${name} in ${filePath}`
+      `Changed active profile in ${mainFilePath} to ${name} in ${filePath}`,
     );
   });
 program
@@ -113,7 +115,7 @@ program
       readdirSync(awsPath)
         .filter((file) => file.endsWith(".creds"))
         .map((file) => file.replace(".creds", ""))
-        .join("\n")
+        .join("\n"),
     );
   });
 
@@ -129,7 +131,7 @@ program
       cpSync(currentFilePath, newFilePath);
       unlinkSync(currentFilePath);
       console.log(
-        `Profile ${currentName} moved to ${newName} as ${newFilePath}`
+        `Profile ${currentName} moved to ${newName} as ${newFilePath}`,
       );
     } else {
       console.log(`Profile ${currentName} not found in ${currentFilePath}`);
@@ -142,19 +144,19 @@ program
   .argument("<name>", "Profile name")
   .argument(
     "[id]",
-    "Aws access key id, optional (will read from stdin if not provided)"
+    "Aws access key id, optional (will read from stdin if not provided)",
   )
   .argument(
     "[secret]",
-    "Aws access key secret, optional (will read from stdin if not provided)"
+    "Aws access key secret, optional (will read from stdin if not provided)",
   )
   .argument(
     "[region]",
-    "Aws region, optional (will read from stdin if not provided)"
+    "Aws region, optional (will read from stdin if not provided)",
   )
   .option(
     "--password",
-    "Reads a password from stdin to encrypt the credentials, will be requested when using the profile"
+    "Reads a password from stdin to encrypt the credentials, will be requested when using the profile",
   )
   .action(
     async (
@@ -162,7 +164,7 @@ program
       id?: string,
       secret?: string,
       region?: string,
-      options: { password: boolean } = { password: false }
+      options: { password: boolean } = { password: false },
     ) => {
       if (!id) {
         id = await askForInput("Aws access key id");
@@ -178,7 +180,7 @@ program
         options.password,
         id,
         secret,
-        region
+        region,
       );
       if (existsSync(filePath)) {
         console.log(`Profile ${name} replaced in ${filePath}`);
@@ -186,13 +188,13 @@ program
         console.log(`Profile ${name} added to ${filePath}`);
       }
       writeFileSync(filePath, contents);
-    }
+    },
   );
 
 program
   .command("env")
   .description(
-    "Outputs a profile as shell compatible variable exports, for use with eval"
+    "Outputs a profile as shell compatible variable exports, for use with eval",
   )
   .argument("<name>", "Profile name")
   .action(async (name: string) => {
@@ -205,7 +207,7 @@ program
 program
   .command("env-run")
   .description(
-    "Run a command with configured environment variables. Pass command after -- or through stdin"
+    "Run a command with configured environment variables. Pass command after -- or through stdin",
   )
   .argument("<name>", "Profile name")
   .argument("[script...]", "Script to run")
@@ -270,14 +272,14 @@ async function getProfileEnv(name: string) {
     ACTIVE_AWS_PROFILE: name,
   };
   return Object.fromEntries(
-    Object.entries(env).filter(([, value]) => value !== undefined)
+    Object.entries(env).filter(([, value]) => value !== undefined),
   );
 }
 
 async function getProfileContents(name: string) {
   const filePath = getFilePath(name);
   const contents = await returnOrDecryptContents(
-    readFileSync(filePath, "utf-8")
+    readFileSync(filePath, "utf-8"),
   );
   const lines = contents.split("\n");
   const id = lines
@@ -296,7 +298,7 @@ async function makeContentsWithOrWithoutPassword(
   usePassword: boolean,
   id: string,
   secret: string,
-  region?: string
+  region?: string,
 ) {
   const password = usePassword
     ? await askForInput("Password", true)
@@ -312,7 +314,7 @@ function encryptContents(password: string, contents: string) {
   const cipher = crypto.createCipheriv(
     "aes-256-cbc",
     hashPassword(password),
-    iv
+    iv,
   );
   const finalContents = Buffer.concat([
     cipher.update(contents),
@@ -343,7 +345,7 @@ async function decryptContents(password: string, rawContents: string) {
   const decipher = crypto.createDecipheriv(
     "aes-256-cbc",
     hashPassword(password),
-    iv
+    iv,
   );
   const decrypted = Buffer.concat([
     decipher.update(contents),
@@ -355,7 +357,7 @@ async function decryptContents(password: string, rawContents: string) {
 function makeProfileContents(
   id: string,
   secret: string,
-  region?: string
+  region?: string,
 ): string {
   return `[default]\naws_access_key_id = ${id}\naws_secret_access_key = ${secret}\n${
     region ? `region = ${region}\n` : ""
@@ -376,7 +378,7 @@ function getFilePath(name: string) {
 
 function getCurrentPackageDetails() {
   return JSON.parse(
-    readFileSync(join(__dirname, "package.json"), "utf-8")
+    readFileSync(join(__dirname, "package.json"), "utf-8"),
   ) as IPackageJson;
 }
 function askForInput(thing: string, silent = false): Promise<string> {
@@ -390,4 +392,10 @@ function askForInput(thing: string, silent = false): Promise<string> {
 
 function hashPassword(password: string) {
   return crypto.createHash("sha256").update(password).digest();
+}
+
+function ensureAwsFolderExists() {
+  if (!existsSync(awsPath)) {
+    mkdirSync(awsPath, { recursive: true });
+  }
 }
