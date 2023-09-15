@@ -30,7 +30,8 @@ program
   .name(packageDetails.name!.replace("@nortech/", ""))
   .description(packageDetails.description!);
 
-const awsPath = join(homedir(), ".aws");
+const awsPath =
+  process.env.AWS_PATH || program.awsPath || join(homedir(), ".aws");
 const mainFilePath = join(awsPath, "credentials");
 
 program
@@ -395,6 +396,6 @@ function hashPassword(password: string) {
 
 function ensureAwsFolderExists() {
   if (!existsSync(awsPath)) {
-    mkdirSync(awsPath);
+    mkdirSync(awsPath, { recursive: true });
   }
 }
