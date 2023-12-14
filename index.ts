@@ -195,12 +195,19 @@ program
     "Outputs a profile as shell compatible variable exports, for use with eval"
   )
   .argument("<name>", "Profile name")
-  .action(async (name: string) => {
-    const env = await getProfileEnv(name);
-    Object.entries(env).forEach(([key, value]) => {
-      console.log(`export ${key}="${value}"`);
-    });
-  });
+  .option("--json", "Outputs raw json")
+  .action(
+    async (name: string, options: { json: boolean } = { json: false }) => {
+      const env = await getProfileEnv(name);
+      if (options.json) {
+        console.log(JSON.stringify(env));
+      } else {
+        Object.entries(env).forEach(([key, value]) => {
+          console.log(`export ${key}="${value}"`);
+        });
+      }
+    }
+  );
 
 program
   .command("env-run")
