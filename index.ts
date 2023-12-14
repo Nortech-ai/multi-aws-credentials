@@ -98,7 +98,8 @@ program
   .action(async (name: string) => {
     const filePath = getFilePath(name);
     const contents = await returnOrDecryptContents(
-      readFileSync(filePath, "utf-8")
+      readFileSync(filePath, "utf-8"),
+      name
     );
     writeFileSync(mainFilePath, contents);
     console.log(
@@ -245,7 +246,7 @@ program
       console.log(`Profile ${name} already encrypted in ${filePath}`);
       console.log("Reencrypting with new password");
     }
-    const config = await returnOrDecryptContents(contents);
+    const config = await returnOrDecryptContents(contents, name);
     const password = await askForInput("Password", true);
     writeFileSync(filePath, encryptContents(password, config));
 
@@ -284,7 +285,8 @@ async function getProfileEnv(name: string) {
 async function getProfileContents(name: string) {
   const filePath = getFilePath(name);
   const contents = await returnOrDecryptContents(
-    readFileSync(filePath, "utf-8")
+    readFileSync(filePath, "utf-8"),
+    name
   );
   const lines = contents.split("\n");
   const id = lines
@@ -332,9 +334,12 @@ function encryptContents(password: string, contents: string) {
   return "ENCRYPTED|" + JSON.stringify(c);
 }
 
-async function returnOrDecryptContents(contents: string) {
+async function returnOrDecryptContents(contents: string, username?: string) {
   const password = contentIsEncrypted(contents)
-    ? await askForInput("Password for aws user", true)
+    ? await askForInput(
+        `Password for aws user ${username ? `(${username})` : ""}`,
+        true
+      )
     : undefined;
   return password ? decryptContents(password, contents) : contents;
 }
