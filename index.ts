@@ -270,16 +270,25 @@ program
 program.parse();
 
 async function getProfileEnv(name: string) {
-  const contents = await getProfileContents(name);
-  const env = {
-    AWS_ACCESS_KEY_ID: contents.id,
-    AWS_SECRET_ACCESS_KEY: contents.secret,
-    AWS_DEFAULT_REGION: contents.region,
-    ACTIVE_AWS_PROFILE: name,
-  };
-  return Object.fromEntries(
-    Object.entries(env).filter(([, value]) => value !== undefined)
-  );
+  if (process.env.ACTIVE_AWS_PROFILE === name) {
+    return {
+      AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
+      AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
+      AWS_DEFAULT_REGION: process.env.AWS_DEFAULT_REGION,
+      ACTIVE_AWS_PROFILE: process.env.ACTIVE_AWS_PROFILE,
+    };
+  } else {
+    const contents = await getProfileContents(name);
+    const env = {
+      AWS_ACCESS_KEY_ID: contents.id,
+      AWS_SECRET_ACCESS_KEY: contents.secret,
+      AWS_DEFAULT_REGION: contents.region,
+      ACTIVE_AWS_PROFILE: name,
+    };
+    return Object.fromEntries(
+      Object.entries(env).filter(([, value]) => value !== undefined)
+    );
+  }
 }
 
 async function getProfileContents(name: string) {
