@@ -24,6 +24,8 @@ const read = require("read") as (opts: {
 }) => Promise<string>;
 const program = new Command();
 
+import jest from "jest";
+
 const packageDetails = getCurrentPackageDetails();
 program
   .version(packageDetails.version!)
