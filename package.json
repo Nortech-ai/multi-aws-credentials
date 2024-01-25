@@ -2,7 +2,7 @@
   "name": "@nortech/multi-aws-credentials",
   "version": "2.7.0",
   "description": "For use cases where aws cli profiles are not sufficient",
-  "main": "index.js",
+  "main": "index.ts", 
   "repository": "https://github.com/Nortech-ai/multi-aws-credentials",
   "author": "joao@nortech.ai",
   "license": "MIT",
@@ -11,7 +11,7 @@
   "files": [
     "index.js"
   ],
-  "scripts": {
+  "scripts": { "test": "jest",
     "test": "jest",
     "tsc": "tsc",
     "prepack": "tsc index.ts",
@@ -24,11 +24,12 @@
     "commander": "^9.4.0",
     "read": "^2.0.0"
   },
-  "devDependencies": {
+  "devDependencies": { "jest": "^27.2.5",
     "@types/node": "^18.11.15",
     "nodemon": "^2.0.20",
     "package-json-type": "^1.0.3",
     "ts-node": "^10.9.1",
     "typescript": "^4.9.4"
+  "jest": "^27.2.5"
   }
 }
