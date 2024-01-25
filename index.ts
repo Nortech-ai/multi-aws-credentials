@@ -220,7 +220,10 @@ program
   .action(async (name: string, args?: string[]) => {
     const stdinIsTTY = process.stdin.isTTY;
     assert(stdinIsTTY || args, "Must pass script when not using stdin");
-    const script = stdinIsTTY ? readFileSync(0, "utf-8") : args!.join(" ");
+    const script =
+      (!args || args.length === 0) && stdinIsTTY
+        ? readFileSync(0, "utf-8")
+        : args!.join(" ");
     const env = await getProfileEnv(name);
     execSync(script, {
       stdio: "inherit",
