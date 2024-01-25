@@ -156,13 +156,17 @@ program
     "--password",
     "Reads a password from stdin to encrypt the credentials, will be requested when using the profile"
   )
+  .option(
+    "--encrypt",
+    "Encrypt the profile with the provided password"
+  )
   .action(
     async (
       name: string,
       id?: string,
       secret?: string,
       region?: string,
-      options: { password: boolean } = { password: false }
+      options: { password: boolean, encrypt: boolean } = { password: false, encrypt: false }
     ) => {
       if (!id) {
         id = await askForInput("Aws access key id");
@@ -175,15 +179,15 @@ program
       }
       const filePath = getFilePath(name);
       const contents = await makeContentsWithOrWithoutPassword(
-        options.password,
+        options.encrypt ? true : options.password,
         id,
         secret,
         region
       );
       if (existsSync(filePath)) {
-        console.log(`Profile ${name} replaced in ${filePath}`);
+        console.log(`Profile ${name} replaced ${options.encrypt ? 'and encrypted ' : ''}in ${filePath}`);
       } else {
-        console.log(`Profile ${name} added to ${filePath}`);
+        console.log(`Profile ${name} added ${options.encrypt ? 'and encrypted ' : ''}to ${filePath}`);
       }
       writeFileSync(filePath, contents);
     }
