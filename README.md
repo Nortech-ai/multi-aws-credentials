@@ -27,7 +27,9 @@ Commands:
   change <name>                                   Change the current (default) profile
   list                                            list profiles
   rename <current-name> <new-name>                Rename a profile
-  upsert [options] <name> [id] [secret] [region]  Add a profile if it doesn't exist, otherwise replace it
+  upsert [options] <name> [id] [secret] [region]  Add or replace a profile, with optional encryption
+                                                  Example: upsert --encrypt my-profile AKIAIOSFODNN7EXAMPLE wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY us-west-2
+  --encrypt                                       Encrypt the profile with the provided password when adding or replacing
   env <name>                                      Outputs a profile as shell compatible variable exports, for use with eval
   env-run <name> [script...]                      Run a command with configured environment variables. Pass command after -- or through stdin
   encrypt <name>                                  Encrypt a profile with a password
