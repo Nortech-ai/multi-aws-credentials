@@ -156,6 +156,10 @@ program
     "--password",
     "Reads a password from stdin to encrypt the credentials, will be requested when using the profile"
   )
+  .option(
+    "--password",
+    "Reads a password from stdin to encrypt the credentials, will be requested when using the profile"
+  )
   .action(
     async (
       name: string,
