@@ -168,6 +168,9 @@ program
       region?: string,
       options: { password: boolean } = { password: false }
     ) => {
+if (options.password) {
+  password = await askForInput("Password", true);
+}
       if (!id) {
         id = await askForInput("Aws access key id");
       }
@@ -178,16 +181,17 @@ program
         region = await askForInput("Aws region [Optional]");
       }
       const filePath = getFilePath(name);
+      const password = options.password ? await askForInput("Password", true) : undefined;
       const contents = await makeContentsWithOrWithoutPassword(
-        options.password,
+        !!password,
         id,
         secret,
         region
       );
       if (existsSync(filePath)) {
-        console.log(`Profile ${name} replaced in ${filePath}`);
+        console.log(`Profile ${name} replaced in ${filePath}${password ? ' with encryption' : ''}`);
       } else {
-        console.log(`Profile ${name} added to ${filePath}`);
+        console.log(`Profile ${name} added to ${filePath}${password ? ' with encryption' : ''}`);
       }
       writeFileSync(filePath, contents);
     }
